@@ -5,7 +5,7 @@ import time
 import osmnx as ox
 
 # Đọc dữ liệu từ file Excel
-file_path = "E:\\HK1_2024_2025\\hethongthongtin\\cac_quan_lau.xlsx"  # Đường dẫn tới file Excel
+file_path = "./highlands_coffee.xlsx"  # Đường dẫn tới file Excel
 df = pd.read_excel(file_path, engine="openpyxl")
 
 # # Dùng geopy để lấy tọa độ từ địa chỉ
@@ -63,6 +63,8 @@ for _, row in df.iterrows():
 # Hiển thị bảng dữ liệu đã xử lý
 print(df[['name', 'address', 'latitude', 'longitude']])
 
+
+ten = "highlands_cau_giay.html"
 # Lưu bản đồ ra file HTML
-m.save("lau_map_cau_giay.html")
-print("Bản đồ đã được tạo và lưu dưới tên 'lau_map_cau_giay.html'")
+m.save(ten)
+print(f"Bản đồ đã được tạo và lưu dưới tên '{ten}'")
