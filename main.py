@@ -8,39 +8,40 @@ import osmnx as ox
 file_path = "./highlands_coffee.xlsx"  # Đường dẫn tới file Excel
 df = pd.read_excel(file_path, engine="openpyxl")
 
-# # Dùng geopy để lấy tọa độ từ địa chỉ
-# geolocator = Nominatim(user_agent="geoapiExercises")
-#
-# # Hàm lấy tọa độ dựa trên địa chỉ
-# def get_coordinates(address):
-#     try:
-#         location = geolocator.geocode(address)
-#         time.sleep(1)  # Thêm độ trễ để tránh bị giới hạn truy vấn
-#         return location.latitude, location.longitude
-#     except:
-#         print(f"Không thể lấy tọa độ cho địa chỉ: {address}")
-#         return None, None
-#
-# # Lấy tọa độ cho từng địa chỉ và tạo 2 cột latitude, longitude
-# df['latitude'], df['longitude'] = zip(*df['address'].apply(get_coordinates))
+
 
 # Tạo bản đồ
-map_center = [21.0294498, 105.7842894]  # Tọa độ trung tâm quận Cầu Giấy
-m = folium.Map(location=map_center, zoom_start=15)
-
+map_center_caugiay = [21.0294498, 105.7842894]  # Tọa độ trung tâm quận Cầu Giấy
+m = folium.Map(location=map_center_caugiay, zoom_start=15)
+map_center_bactuliem = [21.07220759279431, 105.76197986685854] # Tọa độ trung tâm quận Bắc Từ Liêm
+n = folium.Map(location=map_center_bactuliem, zoom_start=15)
 # Thêm ranh giới khu vực Cầu Giấy bằng OSMnx
-place_name = "Cầu Giấy, Hà Nội, Vietnam"
-boundary = ox.geocode_to_gdf(place_name)  # Tải ranh giới khu vực
-geo_json = boundary.geometry.iloc[0].__geo_interface__
+
+bactuliem = "Bắc Từ Liêm, Hà Nội, Vietnam"
+bactuliem_boundary = ox.geocode_to_gdf(bactuliem)
+geo_json_btl = bactuliem_boundary.geometry.iloc[0].__geo_interface__
+caugiay = "Cầu Giấy, Hà Nội, Vietnam"
+caugiay_boundary = ox.geocode_to_gdf(caugiay)  # Tải ranh giới khu vực
+geo_json = caugiay_boundary.geometry.iloc[0].__geo_interface__
 
 # Thêm ranh giới vào bản đồ Folium
+caugiay_layer = folium.FeatureGroup(name="Ranh giới Cầu Giấy")
 folium.GeoJson(
     geo_json,
     name="Ranh giới Cầu Giấy",
     style_function=lambda x: {"color": "blue", "weight": 2, "fillOpacity": 0.1},
-).add_to(m)
+).add_to(caugiay_layer)
+
+bactuliem_layer = folium.FeatureGroup(name="Ranh giới Bắc Từ Liêm")
+folium.GeoJson(
+    geo_json_btl,
+    name="Ranh giới Bắc Từ Liêm",
+    style_function=lambda x: {"color": "blue", "weight": 2, "fillOpacity": 0.1},
+).add_to(bactuliem_layer)
 
 # Thêm các quán lẩu vào bản đồ
+
+
 for _, row in df.iterrows():
     if pd.notnull(row['latitude']) and pd.notnull(row['longitude']):
         # Tạo nội dung popup với CSS
@@ -59,6 +60,12 @@ for _, row in df.iterrows():
         ).add_to(m)
     else:
         print(f"Không thể thêm quán {row['name']} ({row['address']}) do không có tọa độ.")
+        
+        
+bactuliem_layer.add_to(m) #Thêm layer vào map
+caugiay_layer.add_to(m)
+folium.LayerControl().add_to(m) #Tạo control
+
 
 # Hiển thị bảng dữ liệu đã xử lý
 print(df[['name', 'address', 'latitude', 'longitude']])
